@@ -1,0 +1,13 @@
+route,time_slot,congestion_level,parking_difficulty,informal_parking_zone,avg_extra_minutes,carpool_pool_size
+Uvarsad Road,08:30-09:30,High,High,Karnavati University North Lot,12,3
+Uvarsad Road,09:30-11:00,Low,Medium,Karnavati University North Lot,3,1
+Adalaj Bypass,08:30-09:30,Medium,Low,Roadside near Adalaj Circle,6,2
+Adalaj Bypass,09:30-11:00,Low,Low,Roadside near Adalaj Circle,2,0
+GH-0 Road (Gandhinagar-Ahmedabad Highway),08:00-09:00,High,High,Society compound near Kudasan,15,4
+GH-0 Road (Gandhinagar-Ahmedabad Highway),17:30-19:00,High,High,Society compound near Kudasan,14,4
+Kudasan Market Road,10:00-12:00,Medium,High,Market roadside parking,8,1
+Kudasan Market Road,15:00-17:00,Low,Medium,Market roadside parking,4,1
+Sector 21-22 Road,08:30-09:30,Medium,Medium,Sector 21 campus ground,7,2
+Sector 21-22 Road,13:00-14:00,Low,Low,Sector 21 campus ground,2,0
+Infocity Road,09:00-10:00,High,High,Infocity roadside,10,3
+Infocity Road,18:00-19:30,High,High,Infocity roadside,13,3
