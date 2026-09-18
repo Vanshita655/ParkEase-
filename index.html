@@ -3,176 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ParkEase — Smart Parking &amp; Traffic Congestion Assistant</title>
+<title>ParkEase — Smart Parking & Traffic Congestion Assistant</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <style>
-  :root {
-    --paper: #F6F3EC;
-    --ink: #1E2B24;
-    --green: #2F6F4E;
-    --green-deep: #234F39;
-    --amber: #D98F3B;
-    --sage: #8CA79A;
-    --sage-pale: #E3E9E2;
-    --line: #D9D3C4;
-    --white: #FFFFFF;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'IBM Plex Sans', sans-serif;
-    line-height: 1.5;
-  }
-  h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; margin: 0; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 48px 24px 96px; }
-
-  header { margin-bottom: 40px; }
-  header .tag { color: var(--green); font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-  header h1 { font-size: 40px; line-height: 1.1; max-width: 560px; }
-  header p { max-width: 520px; color: #46564C; margin-top: 12px; font-size: 16px; }
-
-  .predictor {
-    background: var(--white);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 28px;
-  }
-  .predictor h2 { font-size: 20px; margin-bottom: 18px; }
-  .fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-  .field label { display: block; font-size: 13px; color: #5B6B60; margin-bottom: 6px; }
-  select, button {
-    width: 100%;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 15px;
-    padding: 10px 12px;
-    border-radius: 3px;
-    border: 1px solid var(--line);
-    background: var(--paper);
-    color: var(--ink);
-  }
-  .find-btn {
-    margin-top: 18px;
-    background: var(--green);
-    color: var(--white);
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 12px 20px;
-    width: auto;
-    transition: background .15s ease;
-  }
-  .find-btn:hover { background: var(--green-deep); }
-
-  .result {
-    margin-top: 24px;
-    border-top: 1px solid var(--line);
-    padding-top: 24px;
-    display: none;
-  }
-  .result.show { display: block; }
-  .verdict { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
-  .verdict .level { font-family: 'Fraunces', serif; font-size: 22px; }
-  .pill { font-size: 12px; padding: 3px 9px; border-radius: 100px; font-weight: 600; }
-  .pill.high { background: #FBE8D3; color: #8A4F0F; }
-  .pill.medium { background: #F3EAD2; color: #7A6524; }
-  .pill.low { background: var(--sage-pale); color: var(--green-deep); }
-  .result .note { color: #5B6B60; font-size: 14px; margin-top: 4px; }
-  .estimate-flag { font-size: 13px; color: #8A6E42; margin-top: 14px; font-style: italic; }
-
-  .grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; margin-top: 36px; }
-  section.panel {
-    background: var(--white);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 22px;
-  }
-  section.panel h3 { font-size: 17px; margin-bottom: 14px; }
-
-  .spot { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--sage-pale); font-size: 14px; }
-  .spot:last-child { border-bottom: none; }
-  .spot .name { font-weight: 500; }
-  .spot .meta { color: #6E7D71; font-size: 13px; }
-  .spot .avail { font-weight: 600; }
-  .spot .avail.high { color: var(--green); }
-  .spot .avail.medium { color: var(--amber); }
-  .spot .avail.low { color: #B84C3F; }
-
-  .savings-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
-  .savings-row .num { font-weight: 600; font-family: 'Fraunces', serif; font-size: 17px; }
-
-  .carpool { margin-top: 20px; background: var(--sage-pale); border-radius: 4px; padding: 18px 22px; }
-  .carpool h3 { font-size: 16px; margin-bottom: 6px; }
-  .carpool p { font-size: 14px; color: #3C4C41; margin: 0; }
-
-  .feedback { margin-top: 20px; display: flex; gap: 10px; }
-  .feedback button {
-    width: auto;
-    background: var(--white);
-    font-size: 13px;
-    cursor: pointer;
-    padding: 8px 14px;
-  }
-  .feedback button.found:hover { border-color: var(--green); color: var(--green); }
-  .feedback button.full:hover { border-color: #B84C3F; color: #B84C3F; }
-
-  footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 13px; color: #6E7D71; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-
-  @media (max-width: 640px) {
-    .fields { grid-template-columns: 1fr; }
-    .grid { grid-template-columns: 1fr; }
-  }
+:root{--paper:#F6F3EC;--ink:#1E2B24;--green:#2F6F4E;--green-deep:#234F39;--amber:#D98F3B;--sage:#8CA79A;--sage-pale:#E3E9E2;--line:#D9D3C4;--white:#fff;--red:#B84C3F}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;line-height:1.5}
+h1,h2,h3{font-family:'Fraunces',serif;font-weight:500;margin:0}.wrap{max-width:980px;margin:0 auto;padding:28px 24px 70px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:38px;gap:20px}
+.brand{font-family:'Fraunces',serif;font-size:24px;color:var(--green-deep)}.brand small{display:block;font:500 11px 'IBM Plex Sans';letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
+.auth-area{display:flex;align-items:center;gap:9px}.auth-btn,.user-chip{border:1px solid var(--line);background:var(--white);color:var(--ink);border-radius:5px;padding:9px 14px;font:600 14px 'IBM Plex Sans';cursor:pointer}
+.auth-btn.primary{background:var(--green);color:#fff;border-color:var(--green)}.auth-btn:hover{border-color:var(--green)}
+.user-chip{cursor:default}.user-chip span{font-weight:400;color:#657269}.logout{padding:7px 10px;font-size:12px}
+header{margin-bottom:36px}header .tag{color:var(--green);font-size:14px;font-weight:600;margin-bottom:6px}header h1{font-size:40px;line-height:1.1;max-width:620px}header p{max-width:650px;color:#46564C;margin-top:12px;font-size:16px}
+.status{display:none;margin:-18px 0 24px;padding:10px 13px;border:1px solid var(--line);border-radius:4px;background:#fff;font-size:13px}.status.show{display:block}.status.error{border-color:#e1aaa3;color:#8d3e35}.status.success{border-color:#a9c5b4;color:var(--green-deep)}
+.predictor,.panel{background:var(--white);border:1px solid var(--line);border-radius:5px}.predictor{padding:28px}.predictor h2{font-size:20px;margin-bottom:18px}
+.fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}.field label{display:block;font-size:13px;color:#5B6B60;margin-bottom:6px}select,button,input{font-family:'IBM Plex Sans',sans-serif;font-size:15px}
+select,.field input{width:100%;padding:10px 12px;border-radius:3px;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+.find-btn{margin-top:18px;background:var(--green);color:#fff;border:0;font-weight:600;cursor:pointer;padding:12px 20px;width:auto;border-radius:3px}.find-btn:hover{background:var(--green-deep)}
+.result{margin-top:24px;border-top:1px solid var(--line);padding-top:24px;display:none}.result.show{display:block}.verdict{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}.verdict .level{font-family:'Fraunces',serif;font-size:22px}.pill{font-size:12px;padding:3px 9px;border-radius:100px;font-weight:600}.pill.high{background:#FBE8D3;color:#8A4F0F}.pill.medium{background:#F3EAD2;color:#7A6524}.pill.low{background:var(--sage-pale);color:var(--green-deep)}.result .note{color:#5B6B60;font-size:14px;margin-top:4px}.estimate-flag{font-size:13px;color:#8A6E42;margin-top:14px;font-style:italic}
+.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;margin-top:28px}.panel{padding:22px}.panel h3{font-size:17px;margin-bottom:14px}
+.spot{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--sage-pale);font-size:14px}.spot:last-child{border-bottom:0}.spot .name{font-weight:500}.spot .meta{color:#6E7D71;font-size:13px}.spot .avail{font-weight:600}.spot .avail.high{color:var(--green)}.spot .avail.medium{color:var(--amber)}.spot .avail.low{color:var(--red)}
+.savings-row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px}.savings-row .num{font-weight:600;font-family:'Fraunces',serif;font-size:17px}
+.carpool{margin-top:20px;background:var(--sage-pale);border-radius:4px;padding:18px 22px}.carpool h3{font-size:16px;margin-bottom:6px}.carpool p{font-size:14px;color:#3C4C41;margin:0}
+.feedback{margin-top:20px;display:flex;gap:10px}.feedback button{width:auto;background:var(--white);font-size:13px;cursor:pointer;padding:8px 14px;border:1px solid var(--line);border-radius:3px}.feedback button:hover{border-color:var(--green)}.feedback .full:hover{border-color:var(--red);color:var(--red)}
+.account-panel{display:none;margin-top:20px}.account-panel.show{display:block}.account-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.metric{font-size:28px;font-family:'Fraunces',serif}.muted{color:#6E7D71;font-size:13px}.history{margin-top:15px}.history-row{display:flex;justify-content:space-between;border-bottom:1px solid var(--sage-pale);padding:9px 0;font-size:13px;gap:12px}.history-row:last-child{border:0}
+.modal{position:fixed;inset:0;background:rgba(30,43,36,.42);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.open{display:flex}.modal-card{background:var(--paper);width:min(430px,100%);border:1px solid var(--line);border-radius:7px;padding:25px;box-shadow:0 20px 60px rgba(0,0,0,.16)}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-head h2{font-size:24px}.close{background:transparent;border:0;width:auto;font-size:25px;padding:0;cursor:pointer}.modal-card label{display:block;font-size:13px;color:#5B6B60;margin:12px 0 5px}.modal-card input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:3px;background:#fff}.modal-submit{width:100%;margin-top:18px;background:var(--green);color:#fff;border:0;border-radius:3px;padding:12px;font-weight:600;cursor:pointer}.switch{font-size:13px;text-align:center;margin:15px 0 0}.switch button{width:auto;background:transparent;border:0;color:var(--green);padding:0;cursor:pointer;font-weight:600}.modal-message{font-size:13px;margin-top:12px;color:#8d3e35;min-height:18px}
+footer{margin-top:50px;padding-top:24px;border-top:1px solid var(--line);font-size:13px;color:#6E7D71;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+@media(max-width:700px){.fields,.grid,.account-grid{grid-template-columns:1fr}.topbar{align-items:flex-start}.auth-area{flex-wrap:wrap;justify-content:flex-end}header h1{font-size:34px}}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <nav class="topbar">
+    <div class="brand">ParkEase<small>Smart campus mobility</small></div>
+    <div class="auth-area" id="authArea">
+      <button class="auth-btn" onclick="openAuth('login')">Login</button>
+      <button class="auth-btn primary" onclick="openAuth('signup')">Sign Up</button>
+    </div>
+  </nav>
 
   <header>
-    <div class="tag">ParkEase</div>
+    <div class="tag">ParkEase · AI for Sustainability</div>
     <h1>Find parking where the maps don't look.</h1>
-    <p>A prediction assistant for the informal, unmapped parking spots around campus — roadside shoulders, open grounds, society compounds — that sensor-based apps never cover.</p>
+    <p>A prediction assistant for the informal, unmapped parking spots around campus — roadside shoulders, open grounds and society compounds that sensor-based apps never cover.</p>
   </header>
+
+  <div class="status" id="status"></div>
 
   <div class="predictor">
     <h2>Where are you headed?</h2>
     <div class="fields">
-      <div class="field">
-        <label for="origin">Coming from</label>
-        <select id="origin">
-          <option>Kudasan</option>
-          <option>Infocity</option>
-          <option>SG Highway</option>
-          <option>Sector 21</option>
-        </select>
+      <div class="field"><label for="origin">Coming from</label>
+        <select id="origin"><option>Kudasan</option><option>Infocity</option><option>SG Highway</option><option>Sector 21</option></select>
       </div>
-      <div class="field">
-        <label for="destination">Destination</label>
-        <select id="destination">
-          <option>KU Main Gate</option>
-          <option>UID Design Block</option>
-          <option>Law &amp; Dental Block</option>
-        </select>
+      <div class="field"><label for="destination">Destination</label>
+        <select id="destination"><option>KU Main Gate</option><option>UID Design Block</option><option>Law &amp; Dental Block</option></select>
       </div>
-      <div class="field">
-        <label for="time">Arrival time</label>
-        <select id="time">
-          <option>08:30–09:30</option>
-          <option>09:30–11:00</option>
-          <option>17:30–19:00</option>
-        </select>
+      <div class="field"><label for="time">Arrival time</label>
+        <select id="time"><option>08:30–09:30</option><option>09:30–11:00</option><option>17:30–19:00</option></select>
       </div>
     </div>
     <button class="find-btn" onclick="predict()">Find parking</button>
 
     <div class="result" id="result">
-      <div class="verdict">
-        <span class="level" id="congestionLevel">High congestion</span>
-        <span class="pill high" id="congestionPill">+12 min</span>
-      </div>
-      <p class="note" id="parkingNote">Parking near the main gate is typically difficult in this window — the north lot has more room right now.</p>
+      <div class="verdict"><span class="level" id="congestionLevel">High congestion</span><span class="pill high" id="congestionPill">+12 min</span></div>
+      <p class="note" id="parkingNote"></p>
       <p class="estimate-flag">Based on historical and community-reported patterns, not live sensors — treat as an estimate.</p>
     </div>
   </div>
@@ -180,41 +79,22 @@
   <div class="grid">
     <section class="panel">
       <h3>Nearby parking spots</h3>
-      <div class="spot">
-        <div>
-          <div class="name">North Lot, KU campus</div>
-          <div class="meta">180m walk · paved bay</div>
-        </div>
-        <div class="avail high">Likely open</div>
-      </div>
-      <div class="spot">
-        <div>
-          <div class="name">Roadside, Uvarsad Rd</div>
-          <div class="meta">90m walk · roadside shoulder</div>
-        </div>
-        <div class="avail medium">Fills fast</div>
-      </div>
-      <div class="spot">
-        <div>
-          <div class="name">Society compound, Kudasan</div>
-          <div class="meta">350m walk · open ground</div>
-        </div>
-        <div class="avail low">Usually full</div>
-      </div>
+      <div class="spot"><div><div class="name" id="spot1">North Lot, KU campus</div><div class="meta">180m walk · paved bay</div></div><div class="avail high">Likely open</div></div>
+      <div class="spot"><div><div class="name">Roadside, Uvarsad Rd</div><div class="meta">90m walk · roadside shoulder</div></div><div class="avail medium">Fills fast</div></div>
+      <div class="spot"><div><div class="name">Society compound, Kudasan</div><div class="meta">350m walk · open ground</div></div><div class="avail low">Usually full</div></div>
     </section>
-
     <section class="panel">
       <h3>This trip's savings</h3>
-      <div class="savings-row"><span>Time saved</span><span class="num">~12 min</span></div>
-      <div class="savings-row"><span>Fuel saved</span><span class="num">~0.3 L</span></div>
-      <div class="savings-row"><span>CO₂ avoided</span><span class="num">~0.7 kg</span></div>
-      <div class="savings-row" style="margin-top:8px; border-top:1px solid var(--sage-pale); padding-top:14px; color:#6E7D71;"><span>Campus this month</span><span class="num" style="font-size:15px;">1,420 kg CO₂</span></div>
+      <div class="savings-row"><span>Time saved</span><span class="num" id="timeSaved">~12 min</span></div>
+      <div class="savings-row"><span>Fuel saved</span><span class="num" id="fuelSaved">~0.3 L</span></div>
+      <div class="savings-row"><span>CO₂ avoided</span><span class="num" id="co2Saved">~0.7 kg</span></div>
+      <div class="savings-row" style="margin-top:8px;border-top:1px solid var(--sage-pale);padding-top:14px;color:#6E7D71"><span>Campus this month</span><span class="num" style="font-size:15px">1,420 kg CO₂</span></div>
     </section>
   </div>
 
   <div class="carpool">
-    <h3>3 people are on this route right now</h3>
-    <p>Students from your department leave for Uvarsad Road around this time. Carpooling here could save an extra 12–22 kg CO₂ this week.</p>
+    <h3 id="carpoolTitle">Community carpooling</h3>
+    <p id="carpoolText">Sign in to save trips, submit parking reports and connect your activity to the ParkEase sustainability dashboard.</p>
   </div>
 
   <div class="feedback">
@@ -222,40 +102,191 @@
     <button class="full" onclick="reportSpot(false)">Full / choked</button>
   </div>
 
-  <footer>
-    <span>SDG 11 · SDG 13</span>
-    <span>Built with IBM Granite 3.0 + RAG, prototyped with IBM Bob</span>
-  </footer>
+  <section class="panel account-panel" id="accountPanel">
+    <h3>My ParkEase activity</h3>
+    <div class="account-grid">
+      <div><div class="muted">Saved trips</div><div class="metric" id="tripCount">0</div></div>
+      <div><div class="muted">CO₂ avoided from saved predictions</div><div class="metric" id="totalCo2">0 kg</div></div>
+    </div>
+    <div class="history" id="history"></div>
+  </section>
 
+  <footer><span>SDG 11 · SDG 13</span><span>Built with IBM Granite 3.0 + RAG, prototyped with IBM Bob</span></footer>
+</div>
+
+<div class="modal" id="authModal" onclick="if(event.target===this) closeAuth()">
+  <div class="modal-card">
+    <div class="modal-head"><h2 id="authTitle">Welcome back</h2><button class="close" onclick="closeAuth()">×</button></div>
+    <form id="authForm" onsubmit="submitAuth(event)">
+      <div id="signupFields">
+        <label for="fullName">Full name</label><input id="fullName" autocomplete="name">
+        <label for="universityId">University ID</label><input id="universityId" placeholder="e.g. KU2407U229">
+        <label for="department">Department</label><input id="department" placeholder="e.g. B.Tech CSE">
+      </div>
+      <label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="email" required>
+      <label for="authPassword">Password</label><input id="authPassword" type="password" minlength="6" autocomplete="current-password" required>
+      <button class="modal-submit" id="authSubmit">Login</button>
+      <div class="modal-message" id="modalMessage"></div>
+      <div class="switch" id="switchText"></div>
+    </form>
+  </div>
 </div>
 
 <script>
-function predict() {
-  const time = document.getElementById('time').value;
-  const result = document.getElementById('result');
-  const level = document.getElementById('congestionLevel');
-  const pill = document.getElementById('congestionPill');
-  const note = document.getElementById('parkingNote');
+const CONFIGURED = window.PARKEASE_SUPABASE_URL && !window.PARKEASE_SUPABASE_URL.includes("YOUR_") &&
+  window.PARKEASE_SUPABASE_KEY && !window.PARKEASE_SUPABASE_KEY.includes("YOUR_");
+let supabaseClient = null;
+let currentUser = null;
+let authMode = "login";
+let lastPrediction = null;
 
-  let data;
-  if (time === '08:30–09:30') {
-    data = { level: 'High congestion', mins: '+12 min', cls: 'high', note: 'Parking near the main gate is typically difficult in this window — the north lot has more room right now.' };
-  } else if (time === '17:30–19:00') {
-    data = { level: 'High congestion', mins: '+14 min', cls: 'high', note: 'Evening pickup traffic is heavy on this corridor — informal roadside spots fill within 15 minutes of this slot starting.' };
+if (CONFIGURED) {
+  supabaseClient = window.supabase.createClient(window.PARKEASE_SUPABASE_URL, window.PARKEASE_SUPABASE_KEY);
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    currentUser = session?.user || null;
+    updateAuthUI();
+    if (currentUser) loadActivity();
+  });
+  initAuth();
+} else {
+  setStatus("Connect Supabase to activate real student accounts and database features. See SETUP_SUPABASE.md.", "error");
+}
+
+async function initAuth() {
+  const {data:{session}} = await supabaseClient.auth.getSession();
+  currentUser = session?.user || null;
+  updateAuthUI();
+  if (currentUser) loadActivity();
+}
+
+function updateAuthUI() {
+  const area = document.getElementById("authArea");
+  const panel = document.getElementById("accountPanel");
+  if (!currentUser) {
+    area.innerHTML = '<button class="auth-btn" onclick="openAuth(\'login\')">Login</button><button class="auth-btn primary" onclick="openAuth(\'signup\')">Sign Up</button>';
+    panel.classList.remove("show");
+    document.getElementById("carpoolTitle").textContent = "Community carpooling";
+    document.getElementById("carpoolText").textContent = "Sign in to save trips, submit parking reports and connect your activity to the ParkEase sustainability dashboard.";
+    return;
+  }
+  const name = currentUser.user_metadata?.full_name || currentUser.email?.split("@")[0] || "Student";
+  area.innerHTML = '<div class="user-chip">👤 ' + escapeHtml(name) + ' <span>· signed in</span></div><button class="auth-btn logout" onclick="logout()">Logout</button>';
+  panel.classList.add("show");
+  document.getElementById("carpoolTitle").textContent = "Welcome to your ParkEase dashboard";
+  document.getElementById("carpoolText").textContent = "Your saved predictions and community reports are tied to your account. Passwords are handled by Supabase Auth.";
+}
+
+function openAuth(mode) {
+  if (!CONFIGURED) { setStatus("Supabase is not connected yet. Add the URL and publishable key in supabase-config.js, then redeploy.", "error"); return; }
+  authMode = mode;
+  document.getElementById("authModal").classList.add("open");
+  document.getElementById("authTitle").textContent = mode === "login" ? "Welcome back" : "Create your ParkEase account";
+  document.getElementById("authSubmit").textContent = mode === "login" ? "Login" : "Create account";
+  document.getElementById("signupFields").style.display = mode === "login" ? "none" : "block";
+  document.getElementById("switchText").innerHTML = mode === "login"
+    ? 'New to ParkEase? <button type="button" onclick="openAuth(\'signup\')">Create an account</button>'
+    : 'Already have an account? <button type="button" onclick="openAuth(\'login\')">Login</button>';
+  document.getElementById("modalMessage").textContent = "";
+}
+function closeAuth(){document.getElementById("authModal").classList.remove("open")}
+async function submitAuth(e) {
+  e.preventDefault();
+  const message = document.getElementById("modalMessage");
+  message.textContent = "Please wait…";
+  if (authMode === "signup") {
+    const fullName = document.getElementById("fullName").value.trim();
+    const universityId = document.getElementById("universityId").value.trim();
+    const department = document.getElementById("department").value.trim();
+    const email = document.getElementById("authEmail").value.trim();
+    const password = document.getElementById("authPassword").value;
+    if (!fullName || !universityId || !department) { message.textContent = "Please complete your student details."; return; }
+    const {data,error} = await supabaseClient.auth.signUp({
+      email,password,
+      options:{data:{full_name:fullName, university_id:universityId, department}, emailRedirectTo: window.location.origin + window.location.pathname}
+    });
+    if (error) { message.textContent = error.message; return; }
+    if (data.session) { closeAuth(); setStatus("Account created. You are signed in.", "success"); }
+    else { message.textContent = "Account created. Check your email to confirm your account, then log in."; }
   } else {
-    data = { level: 'Light traffic', mins: '+3 min', cls: 'low', note: 'Parking is generally easy to find in this window, including roadside spots.' };
+    const email = document.getElementById("authEmail").value.trim();
+    const password = document.getElementById("authPassword").value;
+    const {error} = await supabaseClient.auth.signInWithPassword({email,password});
+    if (error) { message.textContent = error.message; return; }
+    closeAuth(); setStatus("Logged in successfully.", "success");
+  }
+}
+async function logout() {
+  if (supabaseClient) await supabaseClient.auth.signOut();
+  setStatus("You have been logged out.", "success");
+}
+
+async function predict() {
+  if (!currentUser) { openAuth("login"); setStatus("Please log in to use ParkEase and save your trip.", "error"); return; }
+  const origin = document.getElementById("origin").value;
+  const destination = document.getElementById("destination").value;
+  const timeUi = document.getElementById("time").value;
+  const time = timeUi.replace("–","-");
+  let data = null;
+
+  const route = destination === "KU Main Gate" ? "Uvarsad Road" :
+                destination === "UID Design Block" ? "Infocity Road" : "GH-0 Road (Gandhinagar-Ahmedabad Highway)";
+  const {data:rows,error} = await supabaseClient.from("route_patterns").select("*").eq("route",route).eq("time_slot",time).limit(1);
+  if (!error && rows && rows.length) data = rows[0];
+
+  // Keep the existing prototype's useful UI behavior if a chosen combination
+  // is not represented in the seeded dataset.
+  if (!data) {
+    if (time === "08:30-09:30") data = {congestion_level:"High",avg_extra_minutes:12,parking_difficulty:"High",informal_parking_zone:"Karnavati University North Lot",carpool_pool_size:3};
+    else if (time === "17:30-19:00") data = {congestion_level:"High",avg_extra_minutes:14,parking_difficulty:"High",informal_parking_zone:"Society compound near Kudasan",carpool_pool_size:3};
+    else data = {congestion_level:"Low",avg_extra_minutes:3,parking_difficulty:"Low",informal_parking_zone:"North Lot, KU campus",carpool_pool_size:0};
   }
 
-  level.textContent = data.level;
-  pill.textContent = data.mins;
-  pill.className = 'pill ' + data.cls;
-  note.textContent = data.note;
-  result.classList.add('show');
+  const level = document.getElementById("congestionLevel"), pill = document.getElementById("congestionPill"), note = document.getElementById("parkingNote");
+  const cls = data.congestion_level.toLowerCase();
+  level.textContent = data.congestion_level === "Low" ? "Light traffic" : data.congestion_level + " congestion";
+  pill.textContent = "+" + data.avg_extra_minutes + " min";
+  pill.className = "pill " + cls;
+  note.textContent = data.parking_difficulty === "High"
+    ? "Parking near " + data.informal_parking_zone + " is typically difficult in this window — consider the nearby lower-pressure spot."
+    : "Parking near " + data.informal_parking_zone + " is generally manageable in this window.";
+  document.getElementById("result").classList.add("show");
+
+  const timeSaved = Math.max(2, Number(data.avg_extra_minutes));
+  const fuelSaved = Math.max(.1, timeSaved * .025);
+  const co2Saved = fuelSaved * 2.31;
+  document.getElementById("timeSaved").textContent = "~" + timeSaved + " min";
+  document.getElementById("fuelSaved").textContent = "~" + fuelSaved.toFixed(2) + " L";
+  document.getElementById("co2Saved").textContent = "~" + co2Saved.toFixed(2) + " kg";
+  document.getElementById("spot1").textContent = data.informal_parking_zone || "Nearby informal parking";
+
+  lastPrediction = {origin,destination,arrival_time:time,congestion_level:data.congestion_level,extra_minutes:data.avg_extra_minutes,parking_zone:data.informal_parking_zone,time_saved_minutes:timeSaved,fuel_saved_l:fuelSaved,co2_saved_kg:co2Saved};
+  const {error:saveError} = await supabaseClient.from("trip_history").insert([{user_id:currentUser.id,...lastPrediction}]);
+  if (saveError) setStatus("Prediction shown, but the trip could not be saved: " + saveError.message, "error");
+  else { setStatus("Prediction saved to your ParkEase account.", "success"); loadActivity(); }
 }
 
-function reportSpot(found) {
-  alert(found ? 'Thanks — marked as available. This helps recalibrate predictions for others.' : 'Thanks — marked as full. Others nearby will see this reflected shortly.');
+async function reportSpot(found) {
+  if (!currentUser) { openAuth("login"); setStatus("Please log in before submitting a community parking report.", "error"); return; }
+  const route = lastPrediction?.destination || document.getElementById("destination").value;
+  const {error} = await supabaseClient.from("parking_reports").insert([{user_id:currentUser.id,route,destination:route,status:found?"available":"full"}]);
+  if (error) setStatus("Report could not be saved: " + error.message, "error");
+  else setStatus(found ? "Thanks — your availability report was saved." : "Thanks — your full/choked report was saved.", "success");
 }
+
+async function loadActivity() {
+  if (!currentUser) return;
+  const {data,error} = await supabaseClient.from("trip_history").select("*").order("created_at",{ascending:false}).limit(10);
+  if (error) return;
+  document.getElementById("tripCount").textContent = data.length;
+  const total = data.reduce((sum,row)=>sum + Number(row.co2_saved_kg || 0),0);
+  document.getElementById("totalCo2").textContent = total.toFixed(2) + " kg";
+  document.getElementById("history").innerHTML = data.length ? data.map(row =>
+    '<div class="history-row"><span><strong>' + escapeHtml(row.destination) + '</strong><br><span class="muted">' + escapeHtml(row.arrival_time) + ' · ' + escapeHtml(row.congestion_level || "Estimate") + '</span></span><span>' + Number(row.co2_saved_kg || 0).toFixed(2) + ' kg CO₂</span></div>'
+  ).join("") : '<div class="muted">Your saved predictions will appear here.</div>';
+}
+
+function setStatus(text,type="success"){const el=document.getElementById("status");el.textContent=text;el.className="status show "+type;clearTimeout(window.statusTimer);window.statusTimer=setTimeout(()=>el.classList.remove("show"),6000)}
+function escapeHtml(value){return String(value ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 </script>
 </body>
 </html>
